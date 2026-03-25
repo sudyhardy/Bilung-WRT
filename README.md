@@ -50,7 +50,7 @@ Each workflow can be started manually with `workflow_dispatch` and supports sele
 - Default hostname: `Bilung-WRT`
 - Default Wi-Fi name: `Bilung-WRT`
 - Default 5 GHz Wi-Fi name: `Bilung-WRT_5G`
-- Default IP: `192.168.1.1`
+- Default IP: `192.168.31.1`
 - Default username: `root`
 - Default password: `bilung`
 

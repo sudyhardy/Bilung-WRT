@@ -37,6 +37,7 @@ uci set luci.@core[0].lang='en' && uci commit
 
 # configure wan and lan
 echo "configure wan and lan"
+uci set network.lan.ipaddr='192.168.31.1'
 uci set network.WAN=interface
 uci set network.WAN.proto='dhcp'
 uci set network.WAN.device='usb0'

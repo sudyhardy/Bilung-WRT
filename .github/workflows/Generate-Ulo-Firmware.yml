@@ -169,7 +169,7 @@ jobs:
           prerelease: ${{ github.ref_name == 'dev' }}
           body: |
             ## Bilung-WRT INFORMATION ##
-            - Default IP: 192.168.1.1
+            - Default IP: 192.168.31.1
             - Default username: root
             - Default password: xyyraa
             - Default WIFI name: Bilung-WRT | Bilung-WRT_5G
