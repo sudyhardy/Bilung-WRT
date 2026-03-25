@@ -241,7 +241,6 @@ build_firmware() {
     handle_profile_packages "$profile"
     handle_tunnel_option "$tunnel_option"
     handle_release_packages
-    filter_unavailable_packages_for_apk
     fallback_to_legacy_ipk_overlay
     
     make image PROFILE="$profile" PACKAGES="$PACKAGES $EXCLUDED" FILES="$FILES" 2>&1
