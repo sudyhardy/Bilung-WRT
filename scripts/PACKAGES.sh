@@ -111,6 +111,12 @@ verify_packages() {
 # Main execution
 main() {
     local rc=0
+    local pkg_dir="packages"
+
+    # Rebuild the local package cache on every run so stale vendored
+    # IPK files do not mix with 25.12-era APK/IPK downloads.
+    rm -rf "$pkg_dir"
+    mkdir -p "$pkg_dir"
     
     # Download Custom packages
     log "INFO" "Downloading Custom packages..."
