@@ -79,7 +79,7 @@ config mixin 'mixin'
 	option tcp_keep_alive_idle '30'
 	option tcp_keep_alive_interval '30'
 	option ui_name 'Nikki'
-	option api_secret 'xidz'
+	option api_secret 'bilung'
 	option sniffer '1'
 	option sniffer_sniff_dns_mapping '1'
 	option sniffer_sniff_pure_ip '1'
@@ -106,7 +106,7 @@ config lan_access_control
 config authentication
 	option enabled '0'
 	option username 'nikki'
-	option password 'xidz'
+	option password 'bilung'
 
 config hosts
 	option enabled '0'
@@ -186,4 +186,3 @@ config sniff
 config editor 'editor'
 
 config log 'log'
-

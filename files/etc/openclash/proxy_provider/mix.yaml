@@ -1,4 +1,4 @@
-# Modification By @xidz_x # Full Rule Simole #
+# Bilung-WRT bundled provider example
 proxies:
 - name: NL
   server: server.com

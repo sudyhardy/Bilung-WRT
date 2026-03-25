@@ -1,6 +1,6 @@
 #!/bin/sh
 
-exec > /root/setup-xidzwrt.log 2>&1
+exec > /root/setup-bilungwrt.log 2>&1
 
 # dont remove !!!
 echo "Installed Time: $(date '+%A, %d %B %Y %T')"

@@ -1,4 +1,4 @@
-# Modification By @xidz_x
+# Bilung-WRT bundled provider example
 proxies :
 - name: SNI/SSL VLESS
   server: server.com
