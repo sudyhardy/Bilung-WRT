@@ -186,13 +186,15 @@ jobs:
             prerelease_args+=(--prerelease)
           fi
 
-          if gh release view "${{ steps.setupenv.outputs.release_tag }}" >/dev/null 2>&1; then
+          if gh release view "${{ steps.setupenv.outputs.release_tag }}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
             gh release edit "${{ steps.setupenv.outputs.release_tag }}" \
+              --repo "${{ github.repository }}" \
               --title "${{ steps.setupenv.outputs.release_name }}" \
               --notes-file "$body_file" \
               "${prerelease_args[@]}"
           else
             gh release create "${{ steps.setupenv.outputs.release_tag }}" \
+              --repo "${{ github.repository }}" \
               --title "${{ steps.setupenv.outputs.release_name }}" \
               --notes-file "$body_file" \
               --target "${{ github.sha }}" \
@@ -504,15 +506,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if ! gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+          if ! gh release view "${RELEASE_TAG}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
             prerelease_args=()
             if [ "${{ github.ref_name }}" = "dev" ]; then
               prerelease_args+=(--prerelease)
             fi
             gh release create "${RELEASE_TAG}" \
+              --repo "${{ github.repository }}" \
               --title "${RELEASE_NAME}" \
               --notes "" \
               --target "${{ github.sha }}" \
               "${prerelease_args[@]}"
           fi
-          gh release upload "${RELEASE_TAG}" "${{ env.WORKING_DIR }}"/compiled_images/*.img.gz --clobber
+          gh release upload "${RELEASE_TAG}" "${{ env.WORKING_DIR }}"/compiled_images/*.img.gz --clobber --repo "${{ github.repository }}"
