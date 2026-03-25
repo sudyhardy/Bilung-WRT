@@ -11,6 +11,8 @@ make info
 # Main configuration name
 PROFILE=""
 PACKAGES=""
+EXCLUDED=""
+LEGACY_OVERLAY_DIR=".legacy-package-overlay"
 
 # Base
 PACKAGES+=" liblua libc libubus-lua libiwinfo libiwinfo-data libiwinfo-lua libjson-script \
@@ -119,19 +121,128 @@ handle_release_packages() {
     fi
 }
 
+filter_unavailable_packages_for_apk() {
+    local filtered_packages=""
+    local pkg
+    local branch_major="${BRANCH%%.*}"
+
+    if [ "${BASE}" != "openwrt" ] || ! [[ "$branch_major" =~ ^[0-9]+$ ]] || [ "$branch_major" -lt 25 ]; then
+        return 0
+    fi
+
+    log "INFO" "Filtering package list for OpenWrt ${BRANCH} apk compatibility"
+
+    for pkg in $PACKAGES; do
+        if [[ "$pkg" == -* ]]; then
+            filtered_packages+=" $pkg"
+            continue
+        fi
+
+        if [ -f "packages/${pkg}.apk" ] || find packages -maxdepth 1 -type f -name "${pkg}-*.apk" -print -quit | grep -q .; then
+            filtered_packages+=" $pkg"
+            continue
+        fi
+
+        if grep -qE "^Package: ${pkg}$" Packages.manifest 2>/dev/null; then
+            filtered_packages+=" $pkg"
+            continue
+        fi
+
+        log "WARNING" "Skipping unavailable apk package: ${pkg}"
+    done
+
+    PACKAGES="$filtered_packages"
+}
+
+extract_legacy_ipk_to_overlay() {
+    local pkg_name="$1"
+    local pkg_file="$2"
+    local extract_root="$3"
+    local tmp_dir
+    local data_archive
+
+    tmp_dir="$(mktemp -d)"
+    gzip -dc "$pkg_file" > "${tmp_dir}/package.tar" || error_msg "Failed to decompress ${pkg_file}"
+    tar -xf "${tmp_dir}/package.tar" -C "$tmp_dir" || error_msg "Failed to unpack ${pkg_file}"
+
+    data_archive="$(find "$tmp_dir" -maxdepth 1 -type f \( -name 'data.tar.gz' -o -name 'data.tar.xz' -o -name 'data.tar.zst' \) | head -n 1)"
+    [ -n "$data_archive" ] || error_msg "Missing data archive in ${pkg_file}"
+
+    mkdir -p "$extract_root"
+    case "$data_archive" in
+        *.tar.gz) tar -xzf "$data_archive" -C "$extract_root" ;;
+        *.tar.xz) tar -xJf "$data_archive" -C "$extract_root" ;;
+        *.tar.zst) tar --zstd -xf "$data_archive" -C "$extract_root" ;;
+        *) error_msg "Unsupported data archive format in ${pkg_file}" ;;
+    esac
+
+    rm -rf "$tmp_dir"
+    log "WARNING" "Using legacy ipk fallback for package: ${pkg_name}"
+}
+
+fallback_to_legacy_ipk_overlay() {
+    local filtered_packages=""
+    local pkg
+    local branch_major="${BRANCH%%.*}"
+    local overlay_files="${FILES}/${LEGACY_OVERLAY_DIR}"
+    local local_pkg=""
+    local legacy_pkg=""
+
+    if [ "${BASE}" != "openwrt" ] || ! [[ "$branch_major" =~ ^[0-9]+$ ]] || [ "$branch_major" -lt 25 ]; then
+        return 0
+    fi
+
+    rm -rf "$overlay_files"
+    mkdir -p "$overlay_files"
+
+    for pkg in $PACKAGES; do
+        if [[ "$pkg" == -* ]]; then
+            filtered_packages+=" $pkg"
+            continue
+        fi
+
+        if grep -qE "^Package: ${pkg}$" Packages.manifest 2>/dev/null; then
+            filtered_packages+=" $pkg"
+            continue
+        fi
+
+        if find packages -maxdepth 1 -type f -name "${pkg}-*.apk" -print -quit | grep -q . || [ -f "packages/${pkg}.apk" ]; then
+            filtered_packages+=" $pkg"
+            continue
+        fi
+
+        local_pkg="$(find packages -maxdepth 1 -type f \( -name "${pkg}_*.ipk" -o -name "${pkg}-*.ipk" \) | head -n 1)"
+        legacy_pkg="$(find packages-legacy -maxdepth 1 -type f \( -name "${pkg}_*.ipk" -o -name "${pkg}-*.ipk" \) | head -n 1)"
+
+        if [ -n "$local_pkg" ]; then
+            extract_legacy_ipk_to_overlay "$pkg" "$local_pkg" "$overlay_files"
+            continue
+        fi
+
+        if [ -n "$legacy_pkg" ]; then
+            extract_legacy_ipk_to_overlay "$pkg" "$legacy_pkg" "$overlay_files"
+            continue
+        fi
+
+        log "WARNING" "Skipping unavailable package: ${pkg}"
+    done
+
+    PACKAGES="$filtered_packages"
+}
+
 # Main Build Function
 build_firmware() {
     local profile=$1
     local tunnel_option=$2
 
     log "INFO" "Starting build for profile: $profile"
+    FILES="files"
     
     handle_profile_packages "$profile"
     handle_tunnel_option "$tunnel_option"
     handle_release_packages
-    
-    # Custom Files
-    FILES="files"
+    filter_unavailable_packages_for_apk
+    fallback_to_legacy_ipk_overlay
     
     make image PROFILE="$profile" PACKAGES="$PACKAGES $EXCLUDED" FILES="$FILES" 2>&1
     
