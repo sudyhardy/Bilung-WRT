@@ -158,30 +158,46 @@ jobs:
 
       - name: Create Release
         if: steps.setupenv.outputs.status == 'success'
-        uses: softprops/action-gh-release@v2.5.0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.setupenv.outputs.release_tag }}
-          name: ${{ steps.setupenv.outputs.release_name }}
-          prerelease: ${{ github.ref_name == 'dev' }}
-          body: |
-            ## Bilung-WRT - INFORMATION ##
-            - Default IP: 192.168.31.1
-            - Default username: root
-            - Default password: xyyraa
-            - Default WIFI name: Bilung-WRT | Bilung-WRT_5G
-            - Default WIFI password: none
-            ## FITUR - FITUR ##
-            - 3ginfo-Lite | Modeminfo
-            - IP Information
-            - Tailscale
-            - Eqosplus
-            - Droidnet
-            - Internet Detector
-            - Conns monitor
-            - Support Modem Rakitan + Autorekonek
-            - Mactodong
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          body_file="$(mktemp)"
+          cat > "$body_file" <<'EOF'
+          ## Bilung-WRT - INFORMATION ##
+          - Default IP: 192.168.31.1
+          - Default username: root
+          - Default password: xyyraa
+          - Default WIFI name: Bilung-WRT | Bilung-WRT_5G
+          - Default WIFI password: none
+          ## FITUR - FITUR ##
+          - 3ginfo-Lite | Modeminfo
+          - IP Information
+          - Tailscale
+          - Eqosplus
+          - Droidnet
+          - Internet Detector
+          - Conns monitor
+          - Support Modem Rakitan + Autorekonek
+          - Mactodong
+          EOF
+
+          prerelease_args=()
+          if [ "${{ github.ref_name }}" = "dev" ]; then
+            prerelease_args+=(--prerelease)
+          fi
+
+          if gh release view "${{ steps.setupenv.outputs.release_tag }}" >/dev/null 2>&1; then
+            gh release edit "${{ steps.setupenv.outputs.release_tag }}" \
+              --title "${{ steps.setupenv.outputs.release_name }}" \
+              --notes-file "$body_file" \
+              "${prerelease_args[@]}"
+          else
+            gh release create "${{ steps.setupenv.outputs.release_tag }}" \
+              --title "${{ steps.setupenv.outputs.release_name }}" \
+              --notes-file "$body_file" \
+              --target "${{ github.sha }}" \
+              "${prerelease_args[@]}"
+          fi
 
   build-firmware:
     name: Build ${{ matrix.target }} Firmware
@@ -485,11 +501,18 @@ jobs:
 
       - name: Create Release
         if: steps.beforeupload.outputs.status == 'success'
-        uses: softprops/action-gh-release@v2.5.0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.RELEASE_TAG }}
-          name: ${{ env.RELEASE_NAME }}
-          files: ${{ env.WORKING_DIR }}/compiled_images/*.img.gz
-          prerelease: ${{ github.ref_name == 'dev' }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ! gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            prerelease_args=()
+            if [ "${{ github.ref_name }}" = "dev" ]; then
+              prerelease_args+=(--prerelease)
+            fi
+            gh release create "${RELEASE_TAG}" \
+              --title "${RELEASE_NAME}" \
+              --notes "" \
+              --target "${{ github.sha }}" \
+              "${prerelease_args[@]}"
+          fi
+          gh release upload "${RELEASE_TAG}" "${{ env.WORKING_DIR }}"/compiled_images/*.img.gz --clobber
