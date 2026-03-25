@@ -18,7 +18,7 @@ echo "Tunnel Installed: $(opkg list-installed | grep -e luci-app-openclash -e lu
 
 # setup login root password
 echo "setup login root password"
-(echo "xyyraa"; sleep 2; echo "xyyraa") | passwd > /dev/null
+(echo "bilung"; sleep 2; echo "bilung") | passwd > /dev/null
 
 # setup hostname and timezone
 echo "setup hostname and timezone to asia/jakarta"
