@@ -142,6 +142,9 @@ rename_firmware() {
         "x86-64-generic-squashfs-combined-efi|X86_64_Generic_Squashfs_Combined_EFI"
         "x86-64-generic-squashfs-combined|X86_64_Generic_Squashfs_Combined"
         "x86-64-generic-squashfs-rootfs|X86_64_Generic_Squashfs_Rootfs"
+        "x86-64-generic-targz-combined-efi|X86_64_Generic_Targz_Combined_EFI"
+        "x86-64-generic-targz-combined|X86_64_Generic_Targz_Combined"
+        "x86-64-generic-targz-rootfs|X86_64_Generic_Targz_Rootfs"
         "x86-64-generic-rootfs|X86_64_Generic_Rootfs"
     )
 
@@ -157,9 +160,9 @@ rename_firmware() {
                 fi
                 local new_name
                 if [[ -n "$kernel" ]]; then
-                    new_name="${OP_BASE}-${BRANCH}-${replace}-${kernel}-${TUNNEL}-Bilung-WRT.img.gz"
+                    new_name="Bilung-WRT-${BRANCH}-${replace}-${kernel}-${TUNNEL}.img.gz"
                 else
-                    new_name="${OP_BASE}-${BRANCH}-${replace}-${TUNNEL}-Bilung-WRT.img.gz"
+                    new_name="Bilung-WRT-${BRANCH}-${replace}-${TUNNEL}.img.gz"
                 fi
                 echo -e "${INFO} Renaming: $file → $new_name"
                 mv "$file" "$new_name" || {
@@ -171,7 +174,7 @@ rename_firmware() {
         for file in *"${search}"*.tar.gz; do
             if [[ -f "$file" ]]; then
                 local new_name
-                new_name="${OP_BASE}-${BRANCH}-${replace}-${TUNNEL}-Bilung-WRT.img.gz"
+                new_name="Bilung-WRT-${BRANCH}-${replace}-${TUNNEL}.img.gz"
                 echo -e "${INFO} Renaming: $file → $new_name"
                 mv "$file" "$new_name" || {
                     echo -e "${WARN} Failed to rename $file"

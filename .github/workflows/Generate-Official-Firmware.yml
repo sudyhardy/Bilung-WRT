@@ -144,13 +144,13 @@ jobs:
           echo "DATEMONTH=$DATEMONTH" >> $GITHUB_OUTPUT
 
           if [ "${BASE}" == "openwrt" ]; then
-            RELEASE_NAME="OpenWRT-Official-${BRANCH}-${DATE}"
-            RELEASE_TAG="openwrt-Official-${BRANCH}-${DATE}"
+            RELEASE_NAME="Bilung-WRT-Official-${BRANCH}-${DATE}"
+            RELEASE_TAG="bilung-wrt-official-${BRANCH}-${DATE}"
             echo "RELEASE_NAME=$RELEASE_NAME" >> $GITHUB_OUTPUT
             echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_OUTPUT
           elif [ "${BASE}" == "immortalwrt" ]; then
-            RELEASE_NAME="ImmortalWRT-Official-${BRANCH}-${DATE}"
-            RELEASE_TAG="immortalwrt-Official-${BRANCH}-${DATE}"
+            RELEASE_NAME="Bilung-WRT-Immortal-Official-${BRANCH}-${DATE}"
+            RELEASE_TAG="bilung-wrt-immortal-official-${BRANCH}-${DATE}"
             echo "RELEASE_NAME=$RELEASE_NAME" >> $GITHUB_OUTPUT
             echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_OUTPUT
           fi
