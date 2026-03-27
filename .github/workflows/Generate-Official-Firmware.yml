@@ -483,6 +483,12 @@ jobs:
           # Move and rename output files
           for file in bin/targets/"${TARGET_SYSTEM}"/*.img.gz; do
             if [ -f "$file" ]; then
+              case "$file" in
+                *-targz-*)
+                  echo "Skipping non-bootable targz artifact: $file"
+                  continue
+                  ;;
+              esac
               new_name="Bilung-WRT_$(basename "$file" .img.gz)_${TUNNEL}.img.gz"
               mv "$file" compiled_images/$new_name
             fi
