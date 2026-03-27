@@ -4,8 +4,6 @@ exec > /root/setup-bilungwrt.log 2>&1
 
 # dont remove !!!
 echo "Installed Time: $(date '+%A, %d %B %Y %T')"
-sed -i "s#_('Firmware Version'),(L.isObject(boardinfo.release)?boardinfo.release.description+' / ':'')+(luciversion||''),#_('Firmware Version'),(L.isObject(boardinfo.release)?boardinfo.release.description:''),#g" /www/luci-static/resources/view/status/include/10_system.js
-sed -i -E "s|icons/port_%s.png|icons/port_%s.gif|g" /www/luci-static/resources/view/status/include/29_ports.js
 if grep -q "ImmortalWrt" /etc/openwrt_release; then
   sed -i "s/\(DISTRIB_DESCRIPTION='ImmortalWrt [0-9]*\.[0-9]*\.[0-9]*\).*'/\1'/g" /etc/openwrt_release
   sed -i 's|system/ttyd|services/ttyd|g' /usr/share/luci/menu.d/luci-app-ttyd.json
@@ -128,10 +126,6 @@ sed -i 's/option check_signature/# option check_signature/g' /etc/opkg.conf
 # add custom repository
 echo "add custom repository"
 echo "src/gz custom_packages https://dl.openwrt.ai/latest/packages/$(grep "OPENWRT_ARCH" /etc/os-release | awk -F '"' '{print $2}')/kiddin9" >> /etc/opkg/customfeeds.conf
-
-# setup default theme
-echo "setup tema argon default"
-uci set luci.main.mediaurlbase='/luci-static/argon' && uci commit
 
 # remove login password ttyd
 echo "remove login password ttyd"

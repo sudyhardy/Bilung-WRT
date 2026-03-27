@@ -78,8 +78,8 @@ PACKAGES+=" tailscale luci-app-tailscale"
 # Bandwidth And Speedtest
 PACKAGES+=" speedtestcli luci-app-eqosplus"
 
-# Tema
-PACKAGES+=" luci-theme-argon luci-theme-alpha"
+# Keep the stock LuCI look on latest OpenWrt.
+PACKAGES+=" luci-theme-bootstrap"
 
 # Php8
 PACKAGES+=" php8 php8-fastcgi php8-fpm php8-mod-session php8-mod-ctype php8-mod-fileinfo php8-mod-zip php8-mod-iconv php8-mod-mbstring"
